@@ -1,0 +1,19 @@
+{
+    "name": "quran/audio-api",
+    "description": "Quran Audio API using Slim Framework",
+    "type": "project",
+    "require": {
+        "php": "^8.2",
+        "slim/slim": "^4.0",
+        "slim/psr7": "^1.5",
+        "php-di/php-di": "^6.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "scripts": {
+        "start": "php -S localhost:8080 -t public"
+    }
+}
