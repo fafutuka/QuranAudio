@@ -127,9 +127,66 @@ class AudioController {
         $ayahKey = $args['ayah_key'];
         $page = (int)($request->getQueryParams()['page'] ?? 1);
         $perPage = (int)($request->getQueryParams()['per_page'] ?? 10);
-        
+
         $result = $this->audioService->getAyahRecitations($recitationId, 'ayah', $ayahKey, $page, $perPage);
-        
+
+        $response->getBody()->write(json_encode($result));
+        return $response->withHeader('Content-Type', 'application/json');
+    }
+
+    public function getById(Request $request, Response $response, array $args): Response {
+        $id = $args['id'];
+        $audioFile = $this->audioService->getById($id);
+
+        if (!$audioFile) {
+            $response->getBody()->write(json_encode(['error' => 'Audio file not found']));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
+        }
+
+        $response->getBody()->write(json_encode(['audio_file' => $audioFile]));
+        return $response->withHeader('Content-Type', 'application/json');
+    }
+
+    public function create(Request $request, Response $response): Response {
+        $data = json_decode($request->getBody()->getContents(), true);
+
+        $result = $this->audioService->create($data);
+
+        if (isset($result['error'])) {
+            $response->getBody()->write(json_encode($result));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+        }
+
+        $response->getBody()->write(json_encode(['audio_file' => $result]));
+        return $response->withHeader('Content-Type', 'application/json')->withStatus(201);
+    }
+
+    public function update(Request $request, Response $response, array $args): Response {
+        $id = $args['id'];
+        $data = json_decode($request->getBody()->getContents(), true);
+
+        $result = $this->audioService->update($id, $data);
+
+        if (isset($result['error'])) {
+            $statusCode = ($result['error'] === 'Audio file not found') ? 404 : 400;
+            $response->getBody()->write(json_encode($result));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus($statusCode);
+        }
+
+        $response->getBody()->write(json_encode(['audio_file' => $result]));
+        return $response->withHeader('Content-Type', 'application/json');
+    }
+
+    public function delete(Request $request, Response $response, array $args): Response {
+        $id = $args['id'];
+
+        $result = $this->audioService->delete($id);
+
+        if (isset($result['error'])) {
+            $response->getBody()->write(json_encode($result));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
+        }
+
         $response->getBody()->write(json_encode($result));
         return $response->withHeader('Content-Type', 'application/json');
     }

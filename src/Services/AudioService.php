@@ -208,4 +208,87 @@ class AudioService {
             'pagination' => $pagination
         ];
     }
+
+    public function getById($id) {
+        // Fetch audio file by ID from database
+        $audioFile = $this->db->readById('audio_files', $id);
+
+        if (!$audioFile) {
+            return null;
+        }
+
+        $audio = new AudioFile($audioFile);
+
+        // Fetch timestamps for this audio file
+        $timestampsData = $this->db->read('timestamps', ['audio_file_id' => $id]);
+        $timestamps = [];
+
+        if ($timestampsData && !empty($timestampsData)) {
+            foreach ($timestampsData as $t) {
+                // Decode segments JSON field
+                if (isset($t['segments']) && is_string($t['segments'])) {
+                    $t['segments'] = json_decode($t['segments'], true);
+                }
+                $timestamps[] = new Timestamp($t);
+            }
+        }
+
+        $audio->timestamps = $timestamps;
+        return $audio;
+    }
+
+    public function create($data) {
+        // Validate required fields
+        if (empty($data['recitation_id']) || empty($data['chapter_id'])) {
+            return ['error' => 'Recitation ID and Chapter ID are required'];
+        }
+
+        // Create audio file in database
+        $id = $this->db->create('audio_files', $data);
+
+        if (!$id) {
+            return ['error' => 'Failed to create audio file'];
+        }
+
+        // Return the created audio file
+        return $this->getById($id);
+    }
+
+    public function update($id, $data) {
+        // Check if audio file exists
+        $audioFile = $this->getById($id);
+        if (!$audioFile) {
+            return ['error' => 'Audio file not found'];
+        }
+
+        // Update audio file in database
+        $affected = $this->db->update('audio_files', $data, ['id' => $id]);
+
+        if ($affected === false) {
+            return ['error' => 'Failed to update audio file'];
+        }
+
+        // Return the updated audio file
+        return $this->getById($id);
+    }
+
+    public function delete($id) {
+        // Check if audio file exists
+        $audioFile = $this->getById($id);
+        if (!$audioFile) {
+            return ['error' => 'Audio file not found'];
+        }
+
+        // Delete associated timestamps first
+        $this->db->delete('timestamps', ['audio_file_id' => $id]);
+
+        // Delete audio file from database
+        $affected = $this->db->delete('audio_files', ['id' => $id]);
+
+        if ($affected === false) {
+            return ['error' => 'Failed to delete audio file'];
+        }
+
+        return ['success' => true, 'message' => 'Audio file deleted successfully'];
+    }
 }

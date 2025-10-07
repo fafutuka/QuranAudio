@@ -1,0 +1,939 @@
+{
+	"info": {
+		"_postman_id": "quran-audio-api-collection",
+		"name": "Quran Audio API",
+		"description": "A RESTful API implementation for Quran audio recitations using PHP and Slim Framework 4.\n\n## Features\n- **Full CRUD Operations**: Complete Create, Read, Update, Delete functionality for Reciters, Recitations, and Audio Files\n- **Chapter Reciters**: Manage all available reciters with their details\n- **Recitations**: Manage recitation styles and metadata\n- **Audio Files**: Full management of audio files by chapter, juz, page, hizb, rub el hizb, or ayah\n- **Timestamps**: Word-level timing information for precise audio playback\n- **Pagination**: Efficient data retrieval with pagination support\n- **Multi-language**: Language parameter support for internationalization\n- **Grouped Routing**: Well-organized route structure in separate files\n\n## API Structure\n### Reciters Endpoints\n- GET /chapter-reciters - List all\n- GET /chapter-reciters/{id} - Get by ID\n- POST /chapter-reciters - Create\n- PUT /chapter-reciters/{id} - Update\n- DELETE /chapter-reciters/{id} - Delete\n\n### Recitations Endpoints\n- GET /recitations - List all\n- GET /recitations/{id} - Get by ID\n- POST /recitations - Create\n- PUT /recitations/{id} - Update\n- DELETE /recitations/{id} - Delete\n\n### Audio Files Endpoints\n- GET /audio-files/{id} - Get by ID\n- POST /audio-files - Create\n- PUT /audio-files/{id} - Update\n- DELETE /audio-files/{id} - Delete\n- Plus all existing resource endpoints for querying audio files",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Root - API Info",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						""
+					]
+				},
+				"description": "Get API information and available endpoints"
+			},
+			"response": []
+		},
+		{
+			"name": "Health Check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/health",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"health"
+					]
+				},
+				"description": "Health check endpoint that returns API status, environment, database connection status, and version information"
+			},
+			"response": []
+		},
+		{
+			"name": "Reciters",
+			"item": [
+				{
+					"name": "List Chapter Reciters",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/chapter-reciters?language=en",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"chapter-reciters"
+							],
+							"query": [
+								{
+									"key": "language",
+									"value": "en",
+									"description": "Language code (default: 'en')"
+								}
+							]
+						},
+						"description": "Returns a list of all available reciters with their details including name, Arabic name, relative path, format, and file size."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Reciter by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/chapter-reciters/:reciter_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"chapter-reciters",
+								":reciter_id"
+							],
+							"variable": [
+								{
+									"key": "reciter_id",
+									"value": "1",
+									"description": "Reciter ID"
+								}
+							]
+						},
+						"description": "Get a single reciter by ID with all details."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Reciter",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Abdul Basit\",\n  \"arabic_name\": \"عبد الباسط عبد الصمد\",\n  \"relative_path\": \"/abdul-basit/\",\n  \"format\": \"mp3\",\n  \"files_size\": 2048000\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/chapter-reciters",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"chapter-reciters"
+							]
+						},
+						"description": "Create a new reciter. Required fields: name, arabic_name. Optional fields: relative_path, format, files_size."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Reciter",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Abdul Basit Updated\",\n  \"arabic_name\": \"عبد الباسط عبد الصمد\",\n  \"relative_path\": \"/abdul-basit-updated/\",\n  \"format\": \"mp3\",\n  \"files_size\": 2560000\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/chapter-reciters/:reciter_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"chapter-reciters",
+								":reciter_id"
+							],
+							"variable": [
+								{
+									"key": "reciter_id",
+									"value": "1",
+									"description": "Reciter ID"
+								}
+							]
+						},
+						"description": "Update an existing reciter. All fields are optional - only send fields you want to update."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Reciter",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/chapter-reciters/:reciter_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"chapter-reciters",
+								":reciter_id"
+							],
+							"variable": [
+								{
+									"key": "reciter_id",
+									"value": "1",
+									"description": "Reciter ID"
+								}
+							]
+						},
+						"description": "Delete a reciter by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Reciter Audio Files",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/reciters/:reciter_id/audio-files?language=en",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"reciters",
+								":reciter_id",
+								"audio-files"
+							],
+							"query": [
+								{
+									"key": "language",
+									"value": "en",
+									"description": "Language code"
+								}
+							],
+							"variable": [
+								{
+									"key": "reciter_id",
+									"value": "1",
+									"description": "Reciter ID"
+								}
+							]
+						},
+						"description": "Get all audio files for a specific reciter."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Recitations",
+			"item": [
+				{
+					"name": "List Recitations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/recitations?language=en",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"recitations"
+							],
+							"query": [
+								{
+									"key": "language",
+									"value": "en",
+									"description": "Language code (default: 'en')"
+								}
+							]
+						},
+						"description": "Returns a list of all available recitations with reciter name, style, and translated name."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Recitation by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/recitations/:recitation_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"recitations",
+								":recitation_id"
+							],
+							"variable": [
+								{
+									"key": "recitation_id",
+									"value": "1",
+									"description": "Recitation ID"
+								}
+							]
+						},
+						"description": "Get a single recitation by ID with all details."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Recitation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reciter_name\": \"Mishary Rashid Alafasy\",\n  \"style\": \"Murattal\",\n  \"translated_name\": {\n    \"name\": \"Mishary Rashid Alafasy\",\n    \"language_name\": \"en\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/recitations",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"recitations"
+							]
+						},
+						"description": "Create a new recitation. Required fields: reciter_name, style. Optional fields: translated_name (object with name and language_name)."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Recitation",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reciter_name\": \"Mishary Rashid Alafasy Updated\",\n  \"style\": \"Murattal\",\n  \"translated_name\": {\n    \"name\": \"Mishary Rashid Alafasy\",\n    \"language_name\": \"en\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/recitations/:recitation_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"recitations",
+								":recitation_id"
+							],
+							"variable": [
+								{
+									"key": "recitation_id",
+									"value": "1",
+									"description": "Recitation ID"
+								}
+							]
+						},
+						"description": "Update an existing recitation. All fields are optional - only send fields you want to update."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Recitation",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/recitations/:recitation_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"recitations",
+								":recitation_id"
+							],
+							"variable": [
+								{
+									"key": "recitation_id",
+									"value": "1",
+									"description": "Recitation ID"
+								}
+							]
+						},
+						"description": "Delete a recitation by ID."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Audio Files",
+			"item": [
+				{
+					"name": "Get Audio File by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/audio-files/:audio_file_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"audio-files",
+								":audio_file_id"
+							],
+							"variable": [
+								{
+									"key": "audio_file_id",
+									"value": "1",
+									"description": "Audio File ID"
+								}
+							]
+						},
+						"description": "Get a single audio file by ID with all details including timestamps."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Audio File",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"recitation_id\": 1,\n  \"chapter_id\": 1,\n  \"verse_key\": \"1:1\",\n  \"verse_number\": 1,\n  \"juz_number\": 1,\n  \"hizb_number\": 1,\n  \"rub_el_hizb_number\": 1,\n  \"page_number\": 1,\n  \"audio_url\": \"https://cdn.quran.foundation/audio/1/1.mp3\",\n  \"format\": \"mp3\",\n  \"file_size\": 102400,\n  \"duration\": 5000\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/audio-files",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"audio-files"
+							]
+						},
+						"description": "Create a new audio file. Required fields: recitation_id, chapter_id. Optional fields: verse_key, verse_number, juz_number, hizb_number, rub_el_hizb_number, page_number, audio_url, format, file_size, duration."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Audio File",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"audio_url\": \"https://cdn.quran.foundation/audio/updated/1/1.mp3\",\n  \"format\": \"mp3\",\n  \"file_size\": 204800,\n  \"duration\": 5500\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/audio-files/:audio_file_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"audio-files",
+								":audio_file_id"
+							],
+							"variable": [
+								{
+									"key": "audio_file_id",
+									"value": "1",
+									"description": "Audio File ID"
+								}
+							]
+						},
+						"description": "Update an existing audio file. All fields are optional - only send fields you want to update."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Audio File",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/audio-files/:audio_file_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"audio-files",
+								":audio_file_id"
+							],
+							"variable": [
+								{
+									"key": "audio_file_id",
+									"value": "1",
+									"description": "Audio File ID"
+								}
+							]
+						},
+						"description": "Delete an audio file by ID. This will also delete all associated timestamps."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Chapter Audio",
+			"item": [
+				{
+					"name": "Get Chapter Audio File",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/reciters/:reciter_id/chapters/:chapter_number?segments=true",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"reciters",
+								":reciter_id",
+								"chapters",
+								":chapter_number"
+							],
+							"query": [
+								{
+									"key": "segments",
+									"value": "true",
+									"description": "Include word-level segments (true/false)"
+								}
+							],
+							"variable": [
+								{
+									"key": "reciter_id",
+									"value": "1",
+									"description": "Reciter ID"
+								},
+								{
+									"key": "chapter_number",
+									"value": "1",
+									"description": "Chapter number (1-114)"
+								}
+							]
+						},
+						"description": "Get audio file for a specific chapter by a reciter with optional word-level timing segments."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Recitation Audio Files",
+			"item": [
+				{
+					"name": "Get Recitation Audio Files",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/recitation-audio-files/:recitation_id?chapter_number=1&fields=id,audio_url",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"recitation-audio-files",
+								":recitation_id"
+							],
+							"query": [
+								{
+									"key": "chapter_number",
+									"value": "1",
+									"description": "Filter by chapter (optional)"
+								},
+								{
+									"key": "juz_number",
+									"value": "",
+									"description": "Filter by juz (optional)",
+									"disabled": true
+								},
+								{
+									"key": "page_number",
+									"value": "",
+									"description": "Filter by page (optional)",
+									"disabled": true
+								},
+								{
+									"key": "hizb_number",
+									"value": "",
+									"description": "Filter by hizb (optional)",
+									"disabled": true
+								},
+								{
+									"key": "rub_el_hizb_number",
+									"value": "",
+									"description": "Filter by rub el hizb (optional)",
+									"disabled": true
+								},
+								{
+									"key": "fields",
+									"value": "id,audio_url",
+									"description": "Comma-separated list of fields to return (optional)"
+								}
+							],
+							"variable": [
+								{
+									"key": "recitation_id",
+									"value": "1",
+									"description": "Recitation ID"
+								}
+							]
+						},
+						"description": "Get audio files for a recitation with optional filters (chapter, juz, page, hizb, rub el hizb) and field selection."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Recitation Audio Files - Filter by Juz",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/recitation-audio-files/:recitation_id?juz_number=1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"recitation-audio-files",
+								":recitation_id"
+							],
+							"query": [
+								{
+									"key": "juz_number",
+									"value": "1",
+									"description": "Filter by juz number (1-30)"
+								}
+							],
+							"variable": [
+								{
+									"key": "recitation_id",
+									"value": "1",
+									"description": "Recitation ID"
+								}
+							]
+						},
+						"description": "Get audio files for a recitation filtered by Juz number."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Recitation Audio Files - Filter by Page",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/recitation-audio-files/:recitation_id?page_number=1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"recitation-audio-files",
+								":recitation_id"
+							],
+							"query": [
+								{
+									"key": "page_number",
+									"value": "1",
+									"description": "Filter by page number (1-604)"
+								}
+							],
+							"variable": [
+								{
+									"key": "recitation_id",
+									"value": "1",
+									"description": "Recitation ID"
+								}
+							]
+						},
+						"description": "Get audio files for a recitation filtered by page number."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Ayah Recitations",
+			"item": [
+				{
+					"name": "Get Surah Ayah Recitations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/resources/recitations/:recitation_id/:chapter_number?page=1&per_page=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"resources",
+								"recitations",
+								":recitation_id",
+								":chapter_number"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "per_page",
+									"value": "10",
+									"description": "Items per page (default: 10)"
+								}
+							],
+							"variable": [
+								{
+									"key": "recitation_id",
+									"value": "1",
+									"description": "Recitation ID"
+								},
+								{
+									"key": "chapter_number",
+									"value": "1",
+									"description": "Chapter number (1-114)"
+								}
+							]
+						},
+						"description": "Get ayah-level recitations for a specific surah with pagination support."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Juz Ayah Recitations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/resources/recitations/:recitation_id/juz/:juz_number?page=1&per_page=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"resources",
+								"recitations",
+								":recitation_id",
+								"juz",
+								":juz_number"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "per_page",
+									"value": "10",
+									"description": "Items per page (default: 10)"
+								}
+							],
+							"variable": [
+								{
+									"key": "recitation_id",
+									"value": "1",
+									"description": "Recitation ID"
+								},
+								{
+									"key": "juz_number",
+									"value": "1",
+									"description": "Juz number (1-30)"
+								}
+							]
+						},
+						"description": "Get ayah-level recitations for a specific Juz with pagination support."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Page Ayah Recitations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/resources/recitations/:recitation_id/pages/:page_number?page=1&per_page=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"resources",
+								"recitations",
+								":recitation_id",
+								"pages",
+								":page_number"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "per_page",
+									"value": "10",
+									"description": "Items per page (default: 10)"
+								}
+							],
+							"variable": [
+								{
+									"key": "recitation_id",
+									"value": "1",
+									"description": "Recitation ID"
+								},
+								{
+									"key": "page_number",
+									"value": "1",
+									"description": "Quran page number (1-604)"
+								}
+							]
+						},
+						"description": "Get ayah-level recitations for a specific Quran page with pagination support."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Rub el Hizb Ayah Recitations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/resources/recitations/:recitation_id/rub-el-hizb/:rub_el_hizb_number?page=1&per_page=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"resources",
+								"recitations",
+								":recitation_id",
+								"rub-el-hizb",
+								":rub_el_hizb_number"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "per_page",
+									"value": "10",
+									"description": "Items per page (default: 10)"
+								}
+							],
+							"variable": [
+								{
+									"key": "recitation_id",
+									"value": "1",
+									"description": "Recitation ID"
+								},
+								{
+									"key": "rub_el_hizb_number",
+									"value": "1",
+									"description": "Rub el Hizb number (1-240)"
+								}
+							]
+						},
+						"description": "Get ayah-level recitations for a specific Rub el Hizb with pagination support."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Hizb Ayah Recitations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/resources/recitations/:recitation_id/hizb/:hizb_number?page=1&per_page=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"resources",
+								"recitations",
+								":recitation_id",
+								"hizb",
+								":hizb_number"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "per_page",
+									"value": "10",
+									"description": "Items per page (default: 10)"
+								}
+							],
+							"variable": [
+								{
+									"key": "recitation_id",
+									"value": "1",
+									"description": "Recitation ID"
+								},
+								{
+									"key": "hizb_number",
+									"value": "1",
+									"description": "Hizb number (1-60)"
+								}
+							]
+						},
+						"description": "Get ayah-level recitations for a specific Hizb with pagination support."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Ayah Recitation",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/resources/ayah-recitation/:recitation_id/:ayah_key",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"resources",
+								"ayah-recitation",
+								":recitation_id",
+								":ayah_key"
+							],
+							"variable": [
+								{
+									"key": "recitation_id",
+									"value": "1",
+									"description": "Recitation ID"
+								},
+								{
+									"key": "ayah_key",
+									"value": "1:1",
+									"description": "Ayah key (e.g., '1:1' for Al-Fatiha, verse 1)"
+								}
+							]
+						},
+						"description": "Get recitation for a specific ayah. Format: chapter_number:verse_number (e.g., 1:1 for first verse of Al-Fatiha)"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost/QuranAudio",
+			"type": "string"
+		}
+	]
+}

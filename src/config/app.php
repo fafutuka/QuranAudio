@@ -8,8 +8,8 @@ $localBase = getenv('FRONTEND_BASE_URL_LOCAL') ?: 'http://localhost:9000/#/';
 $prodBase = getenv('FRONTEND_BASE_URL_PROD') ?: 'https://quran.fafutuka.com/#/';
 $base = getenv('FRONTEND_BASE_URL') ?: ($env === 'local' ? $localBase : $prodBase);
 
-// API Host configuration
-$localApiHost = getenv('API_HOST_LOCAL') ?: 'http://localhost/eventa';
+// API Host configuration for QuranAudio
+$localApiHost = getenv('API_HOST_LOCAL') ?: 'http://localhost/QuranAudio';
 $prodApiHost = getenv('API_HOST_PROD') ?: 'https://quranapi.fafutuka.com';
 $apiHost = getenv('API_HOST') ?: ($env === 'local' ? $localApiHost : $prodApiHost);
 
@@ -76,9 +76,9 @@ if (!function_exists('getApiHost')) {
         $host = $_SERVER['HTTP_HOST'] ?? '';
         $isLocalHost = (stripos($host, 'localhost') !== false) || (stripos($host, '127.0.0.1') !== false);
         
-        // Environment configuration
-        $localApiHost = getenv('API_HOST_LOCAL') ?: 'http://localhost/eventa';
-        $prodApiHost = getenv('API_HOST_PROD') ?: 'https://dev.fafutuka.com';
+        // Environment configuration for QuranAudio
+        $localApiHost = getenv('API_HOST_LOCAL') ?: 'http://localhost/QuranAudio';
+        $prodApiHost = getenv('API_HOST_PROD') ?: 'https://quranapi.fafutuka.com';
         
         // Highest priority: explicit API_HOST env var
         $envApiHost = getenv('API_HOST') ?: '';

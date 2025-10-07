@@ -11,6 +11,7 @@ class ComposerStaticInit859a78ca4f48271e21aa320e7aea009c
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
         'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
         'b33e3d135e5d9e47d845c576147bda89' => __DIR__ . '/..' . '/php-di/php-di/src/functions.php',
+        'ca48f11154ee8c7d9b151af484346afd' => __DIR__ . '/../..' . '/src/Services/DatabaseService.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -75,8 +76,8 @@ class ComposerStaticInit859a78ca4f48271e21aa320e7aea009c
         ),
         'Psr\\Http\\Message\\' => 
         array (
-            0 => __DIR__ . '/..' . '/psr/http-message/src',
-            1 => __DIR__ . '/..' . '/psr/http-factory/src',
+            0 => __DIR__ . '/..' . '/psr/http-factory/src',
+            1 => __DIR__ . '/..' . '/psr/http-message/src',
         ),
         'Psr\\Container\\' => 
         array (

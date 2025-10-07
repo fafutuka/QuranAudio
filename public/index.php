@@ -10,6 +10,9 @@ require __DIR__ . '/../vendor/autoload.php';
 // Load database configuration
 $dbConfig = require __DIR__ . '/../src/config/database.php';
 
+// Load app configuration
+$appConfig = require __DIR__ . '/../src/config/app.php';
+
 // Create Container
 $container = new Container();
 AppFactory::setContainer($container);
@@ -55,6 +58,14 @@ $container->set('App\Controllers\AudioController', function($container) {
 // Create App
 $app = AppFactory::create();
 
+// Set base path dynamically based on environment
+$apiHost = $appConfig['api_host'];
+$parsedUrl = parse_url($apiHost);
+$basePath = $parsedUrl['path'] ?? '';
+if (!empty($basePath)) {
+    $app->setBasePath($basePath);
+}
+
 // Add error middleware
 $app->addErrorMiddleware(true, true, true);
 
@@ -67,8 +78,21 @@ $app->get('/', function (Request $request, Response $response) {
         'message' => 'Quran Audio API',
         'version' => '1.0',
         'endpoints' => [
+            'GET /health' => 'Health check endpoint',
             'GET /chapter-reciters' => 'List all chapter reciters',
+            'GET /chapter-reciters/{id}' => 'Get single reciter by ID',
+            'POST /chapter-reciters' => 'Create new reciter',
+            'PUT /chapter-reciters/{id}' => 'Update existing reciter',
+            'DELETE /chapter-reciters/{id}' => 'Delete reciter',
             'GET /recitations' => 'List all recitations',
+            'GET /recitations/{id}' => 'Get single recitation by ID',
+            'POST /recitations' => 'Create new recitation',
+            'PUT /recitations/{id}' => 'Update existing recitation',
+            'DELETE /recitations/{id}' => 'Delete recitation',
+            'GET /audio-files/{id}' => 'Get single audio file by ID',
+            'POST /audio-files' => 'Create new audio file',
+            'PUT /audio-files/{id}' => 'Update existing audio file',
+            'DELETE /audio-files/{id}' => 'Delete audio file',
             'GET /reciters/{id}/chapters/{chapter_number}' => 'Get chapter audio file',
             'GET /reciters/{id}/audio-files' => 'Get all audio files for a reciter',
             'GET /recitation-audio-files/{recitation_id}' => 'Get audio files for a recitation',
@@ -83,37 +107,43 @@ $app->get('/', function (Request $request, Response $response) {
     return $response->withHeader('Content-Type', 'application/json');
 });
 
-// Chapter Reciters endpoint
-$app->get('/chapter-reciters', 'App\Controllers\ReciterController:getAll');
+// Health check endpoint
+$app->get('/health', function (Request $request, Response $response) use ($appConfig) {
+    $dbStatus = 'not_configured';
 
-// Recitations endpoint
-$app->get('/recitations', 'App\Controllers\RecitationController:getAll');
+    try {
+        $dbConfig = require __DIR__ . '/../src/config/database.php';
+        $testConn = new \mysqli($dbConfig['host'], $dbConfig['user'], $dbConfig['password'], $dbConfig['database']);
 
-// Chapter audio file endpoint
-$app->get('/reciters/{id}/chapters/{chapter_number}', 'App\Controllers\AudioController:getChapterAudio');
+        if ($testConn->connect_error) {
+            $dbStatus = 'error: ' . $testConn->connect_error;
+        } else {
+            $dbStatus = $testConn->ping() ? 'connected' : 'disconnected';
+            $testConn->close();
+        }
+    } catch (Exception $e) {
+        $dbStatus = 'error: ' . $e->getMessage();
+    }
 
-// Reciter audio files endpoint
-$app->get('/reciters/{id}/audio-files', 'App\Controllers\AudioController:getReciterAudioFiles');
+    $host = $_SERVER['HTTP_HOST'] ?? 'unknown';
+    $isLocalHost = (stripos($host, 'localhost') !== false) || (stripos($host, '127.0.0.1') !== false);
+    $environment = $isLocalHost ? 'local' : 'production';
 
-// Recitation audio files endpoint
-$app->get('/recitation-audio-files/{recitation_id}', 'App\Controllers\AudioController:getRecitationAudioFiles');
+    $response->getBody()->write(json_encode([
+        'status' => 'ok',
+        'timestamp' => date('Y-m-d H:i:s'),
+        'environment' => $environment,
+        'api_host' => $appConfig['api_host'],
+        'database' => $dbStatus,
+        'version' => '1.0',
+        'php_version' => phpversion()
+    ]));
+    return $response->withHeader('Content-Type', 'application/json');
+});
 
-// Surah ayah recitations endpoint
-$app->get('/resources/recitations/{recitation_id}/{chapter_number}', 'App\Controllers\AudioController:getSurahAyahRecitations');
-
-// Juz ayah recitations endpoint
-$app->get('/resources/recitations/{recitation_id}/juz/{juz_number}', 'App\Controllers\AudioController:getJuzAyahRecitations');
-
-// Page ayah recitations endpoint
-$app->get('/resources/recitations/{recitation_id}/pages/{page_number}', 'App\Controllers\AudioController:getPageAyahRecitations');
-
-// Rub el Hizb ayah recitations endpoint
-$app->get('/resources/recitations/{recitation_id}/rub-el-hizb/{rub_el_hizb_number}', 'App\Controllers\AudioController:getRubElHizbAyahRecitations');
-
-// Hizb ayah recitations endpoint
-$app->get('/resources/recitations/{recitation_id}/hizb/{hizb_number}', 'App\Controllers\AudioController:getHizbAyahRecitations');
-
-// Ayah recitation endpoint
-$app->get('/resources/ayah-recitation/{recitation_id}/{ayah_key}', 'App\Controllers\AudioController:getAyahRecitations');
+// Load route files
+(require __DIR__ . '/../src/routes/reciter.php')($app);
+(require __DIR__ . '/../src/routes/recitation.php')($app);
+(require __DIR__ . '/../src/routes/audio.php')($app);
 
 $app->run();
