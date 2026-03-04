@@ -75,14 +75,14 @@ if (!function_exists('getApiHost')) {
     {
         $host = $_SERVER['HTTP_HOST'] ?? '';
         $isLocalHost = (stripos($host, 'localhost') !== false) || (stripos($host, '127.0.0.1') !== false);
-        
+
         // Environment configuration for QuranAudio
         $localApiHost = getenv('API_HOST_LOCAL') ?: 'http://localhost/QuranAudio';
         $prodApiHost = getenv('API_HOST_PROD') ?: 'https://quranapi.fafutuka.com';
-        
+
         // Highest priority: explicit API_HOST env var
         $envApiHost = getenv('API_HOST') ?: '';
-        
+
         if ($isLocalHost) {
             // If serving from localhost, default to local API host unless explicitly overridden
             $apiHost = $envApiHost ?: $localApiHost;
@@ -91,7 +91,7 @@ if (!function_exists('getApiHost')) {
             $env = getenv('APP_ENV') ?: 'production';
             $apiHost = $envApiHost ?: ($env === 'local' ? $localApiHost : $prodApiHost);
         }
-        
+
         return rtrim($apiHost, '/');
     }
 }
@@ -100,7 +100,11 @@ return [
     // Base URL of the frontend SPA used for redirects after payments
     // Can include '#/' suffix; backend will sanitize it for redirects.
     'frontend_base_url' => $base,
-    
+
     // API Host for generating full URLs (without trailing slash)
     'api_host' => rtrim($apiHost, '/'),
+
+    // JWT Configuration
+    'jwt_secret' => getenv('JWT_SECRET') ?: 'quran_audio_secret_key_change_me_in_prod',
+    'jwt_expiry' => 3600 * 24, // 24 hours
 ];

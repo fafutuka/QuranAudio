@@ -1,6 +1,9 @@
 <?php
 
-class DatabaseService {
+namespace App\Services;
+
+class DatabaseService
+{
     protected $conn = "";
     private $host;
     private $user;
@@ -8,7 +11,8 @@ class DatabaseService {
     private $database;
 
     // Constructor to set the database connection
-    public function __construct($host, $user, $password, $database) {
+    public function __construct($host, $user, $password, $database)
+    {
         $this->host = $host;
         $this->user = $user;
         $this->password = $password;
@@ -23,7 +27,8 @@ class DatabaseService {
     }
 
     // Create a new record in the database using prepared statements
-    public function create($table, $data) {
+    public function create($table, $data)
+    {
         // Check if the data array is not empty
         if (empty($data)) {
             return false;
@@ -76,14 +81,15 @@ class DatabaseService {
             // Log the specific database error
             $error = $stmt->error;
             error_log("Database error in create method for table $table: " . $error);
-            
+
             $stmt->close();
             return false;
         }
     }
 
     // Helper method to read a record by ID using prepared statement
-    public function readById($table, $id) {
+    public function readById($table, $id)
+    {
         $query = "SELECT * FROM $table WHERE id = ?";
         $stmt = $this->conn->prepare($query);
         if (!$stmt) {
@@ -95,7 +101,7 @@ class DatabaseService {
 
         // Use store_result and fetch with metadata instead of get_result
         $stmt->store_result();
-        
+
         if ($stmt->num_rows > 0) {
             $row = $this->fetchAssocStatement($stmt);
             $stmt->close();
@@ -107,17 +113,18 @@ class DatabaseService {
     }
 
     // Helper method to fetch associative array from prepared statement
-    private function fetchAssocStatement($stmt) {
+    private function fetchAssocStatement($stmt)
+    {
         $meta = $stmt->result_metadata();
         $fields = array();
         $row = array();
-        
+
         while ($field = $meta->fetch_field()) {
             $fields[] = &$row[$field->name];
         }
-        
+
         call_user_func_array(array($stmt, 'bind_result'), $fields);
-        
+
         if ($stmt->fetch()) {
             // Create a copy of the row to avoid reference issues
             $result = array();
@@ -126,22 +133,23 @@ class DatabaseService {
             }
             return $result;
         }
-        
+
         return false;
     }
 
     // Helper method to fetch all rows from prepared statement
-    private function fetchAllAssocStatement($stmt) {
+    private function fetchAllAssocStatement($stmt)
+    {
         $meta = $stmt->result_metadata();
         $fields = array();
         $row = array();
-        
+
         while ($field = $meta->fetch_field()) {
             $fields[] = &$row[$field->name];
         }
-        
+
         call_user_func_array(array($stmt, 'bind_result'), $fields);
-        
+
         $results = array();
         while ($stmt->fetch()) {
             // Create a copy of the row to avoid reference issues
@@ -151,12 +159,13 @@ class DatabaseService {
             }
             $results[] = $result;
         }
-        
+
         return $results;
     }
 
     // Read records from the database using prepared statements when possible
-    public function read($table, $conditions = "") {
+    public function read($table, $conditions = "")
+    {
         // If no conditions or empty array, select all records
         if (empty($conditions)) {
             $query = "SELECT * FROM $table";
@@ -167,18 +176,17 @@ class DatabaseService {
 
             $stmt->execute();
             $stmt->store_result();
-            
+
             if ($stmt->num_rows > 0) {
                 $rows = $this->fetchAllAssocStatement($stmt);
                 $stmt->close();
-                
+
                 // Always return array of arrays for consistency
                 return $rows;
             } else {
                 $stmt->close();
                 return array();
             }
-
         } else if (is_array($conditions)) {
             // Handle array conditions with prepared statement
             $whereClause = [];
@@ -188,7 +196,7 @@ class DatabaseService {
             foreach ($conditions as $key => $value) {
                 $whereClause[] = "$key = ?";
                 $params[] = $value;
-                
+
                 if (is_int($value)) {
                     $types .= 'i';
                 } elseif (is_float($value)) {
@@ -223,18 +231,17 @@ class DatabaseService {
 
             $stmt->execute();
             $stmt->store_result();
-            
+
             if ($stmt->num_rows > 0) {
                 $rows = $this->fetchAllAssocStatement($stmt);
                 $stmt->close();
-                
+
                 // Always return array of arrays for consistency
                 return $rows;
             } else {
                 $stmt->close();
                 return array();
             }
-
         } else if (preg_match('/^id = (\d+)$/', $conditions, $matches)) {
             // Handle simple id condition with prepared statement
             $id = $matches[1];
@@ -243,7 +250,7 @@ class DatabaseService {
             // For complex conditions, fallback to regular query but escape properly
             $query = "SELECT * FROM $table WHERE " . $conditions;
             $result = mysqli_query($this->conn, $query);
-            
+
             // Check if the query was successful
             if ($result) {
                 // Fetch all rows into an array
@@ -261,10 +268,11 @@ class DatabaseService {
     }
 
     // Execute a custom query with prepared statement support
-    public function runQuery($query, $params = array()) {
+    public function runQuery($query, $params = array())
+    {
         // Check if it's a SELECT query
         $isSelectQuery = (stripos(trim($query), 'SELECT') === 0);
-        
+
         // If params are provided, use prepared statement
         if (!empty($params)) {
             $stmt = $this->conn->prepare($query);
@@ -299,11 +307,11 @@ class DatabaseService {
             if ($isSelectQuery) {
                 // For SELECT queries, use our custom fetch method
                 $stmt->store_result();
-                
+
                 if ($stmt->num_rows > 0) {
                     $rows = $this->fetchAllAssocStatement($stmt);
                     $stmt->close();
-                    
+
                     // Always return array of arrays for consistency
                     return $rows;
                 } else {
@@ -319,7 +327,7 @@ class DatabaseService {
         } else {
             // For queries without parameters, use regular query
             $result = mysqli_query($this->conn, $query);
-            
+
             // Check if the query was successful
             if ($result) {
                 if ($isSelectQuery) {
@@ -342,7 +350,8 @@ class DatabaseService {
     }
 
     // Update a record in the database using prepared statements
-    public function update($table, $data, $conditions) {
+    public function update($table, $data, $conditions)
+    {
         if (empty($data)) {
             return false;
         }
@@ -365,7 +374,7 @@ class DatabaseService {
             foreach ($conditions as $key => $value) {
                 $whereStatements[] = "$key = ?";
                 $conditionValues[] = $value;
-                
+
                 if (is_int($value)) {
                     $conditionTypes .= 'i';
                 } elseif (is_float($value)) {
@@ -434,7 +443,8 @@ class DatabaseService {
     }
 
     // Delete a record from the database using prepared statements when possible
-    public function delete($table, $conditions) {
+    public function delete($table, $conditions)
+    {
         $whereClause = "";
         $conditionValues = [];
         $conditionTypes = "";
@@ -445,7 +455,7 @@ class DatabaseService {
             foreach ($conditions as $key => $value) {
                 $whereStatements[] = "$key = ?";
                 $conditionValues[] = $value;
-                
+
                 if (is_int($value)) {
                     $conditionTypes .= 'i';
                 } elseif (is_float($value)) {
@@ -512,12 +522,14 @@ class DatabaseService {
     }
 
     // Properly escape a string for use in a SQL query
-    public function escapeString($data) {
+    public function escapeString($data)
+    {
         return $this->conn->real_escape_string($data);
     }
 
     // Sanitize input data to prevent SQL injection
-    public function sanitize($data) {
+    public function sanitize($data)
+    {
         if (is_array($data)) {
             return array_map(array($this, 'sanitize'), $data);
         } else {

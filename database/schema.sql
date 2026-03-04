@@ -76,7 +76,36 @@ CREATE TABLE IF NOT EXISTS timestamps (
     FOREIGN KEY (audio_file_id) REFERENCES audio_files(id) ON DELETE CASCADE,
     INDEX idx_audio_file (audio_file_id),
     INDEX idx_verse_key (verse_key)
+);
+
+-- Table: roles
+-- Stores user roles for RBAC
+CREATE TABLE IF NOT EXISTS roles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    slug VARCHAR(50) NOT NULL UNIQUE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: users
+-- Stores user accounts with role association
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (role_id) REFERENCES roles(id),
+    INDEX idx_email (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Seed roles
+INSERT INTO roles (name, slug) VALUES 
+('Super Admin', 'superadmin'),
+('Admin', 'admin'),
+('Moderator', 'moderator');
+
 
 -- Insert sample data for reciters
 INSERT INTO reciters (id, name, arabic_name, relative_path, format, files_size) VALUES

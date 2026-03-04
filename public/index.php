@@ -18,8 +18,8 @@ $container = new Container();
 AppFactory::setContainer($container);
 
 // Set up DatabaseService
-$container->set('DatabaseService', function() use ($dbConfig) {
-    return new DatabaseService(
+$container->set('DatabaseService', function () use ($dbConfig) {
+    return new \App\Services\DatabaseService(
         $dbConfig['host'],
         $dbConfig['user'],
         $dbConfig['password'],
@@ -28,30 +28,91 @@ $container->set('DatabaseService', function() use ($dbConfig) {
 });
 
 // Set up dependencies
-$container->set('App\Services\ReciterService', function($container) {
+$container->set('App\Services\ReciterService', function ($container) {
     return new App\Services\ReciterService($container->get('DatabaseService'));
 });
 
-$container->set('App\Services\RecitationService', function($container) {
+$container->set('App\Services\RecitationService', function ($container) {
     return new App\Services\RecitationService($container->get('DatabaseService'));
 });
 
-$container->set('App\Services\AudioService', function($container) {
+$container->set('App\Services\AudioService', function ($container) {
     return new App\Services\AudioService($container->get('DatabaseService'));
 });
 
-$container->set('App\Controllers\ReciterController', function($container) {
+$container->set('App\Controllers\ReciterController', function ($container) {
     return new App\Controllers\ReciterController($container->get('App\Services\ReciterService'));
 });
 
-$container->set('App\Controllers\RecitationController', function($container) {
+$container->set('App\Controllers\RecitationController', function ($container) {
     return new App\Controllers\RecitationController($container->get('App\Services\RecitationService'));
 });
 
-$container->set('App\Controllers\AudioController', function($container) {
+$container->set('App\Controllers\AudioController', function ($container) {
     return new App\Controllers\AudioController(
         $container->get('App\Services\AudioService'),
         $container->get('App\Services\RecitationService')
+    );
+});
+
+// Auth dependencies
+$container->set('App\Services\AuthService', function ($container) {
+    return new App\Services\AuthService($container->get('DatabaseService'));
+});
+
+$container->set('App\Controllers\AuthController', function ($container) {
+    return new App\Controllers\AuthController($container->get('App\Services\AuthService'));
+});
+
+$container->set('App\Middleware\JwtMiddleware', function ($container) {
+    return new App\Middleware\JwtMiddleware($container->get('App\Services\AuthService'));
+});
+
+$container->set('App\Middleware\CorsMiddleware', function () {
+    return new App\Middleware\CorsMiddleware();
+});
+
+// Tafseer dependencies
+$container->set('App\Services\MufasserService', function ($container) {
+    return new App\Services\MufasserService($container->get('DatabaseService'));
+});
+
+$container->set('App\Services\TafseerService', function ($container) {
+    return new App\Services\TafseerService($container->get('DatabaseService'));
+});
+
+$container->set('App\Services\AudioTafseerService', function ($container) {
+    return new App\Services\AudioTafseerService($container->get('DatabaseService'));
+});
+
+$container->set('App\Controllers\MufasserController', function ($container) {
+    return new App\Controllers\MufasserController($container->get('App\Services\MufasserService'));
+});
+
+$container->set('App\Controllers\TafseerController', function ($container) {
+    return new App\Controllers\TafseerController($container->get('App\Services\TafseerService'));
+});
+
+$container->set('App\Controllers\AudioTafseerController', function ($container) {
+    return new App\Controllers\AudioTafseerController($container->get('App\Services\AudioTafseerService'));
+});
+
+// Cloudinary dependencies
+$container->set('App\Services\CloudinaryService', function () {
+    return new App\Services\CloudinaryService();
+});
+
+$container->set('App\Services\TafseerCloudinaryService', function ($container) {
+    return new App\Services\TafseerCloudinaryService(
+        $container->get('App\Services\CloudinaryService'),
+        $container->get('App\Services\AudioTafseerService')
+    );
+});
+
+$container->set('App\Controllers\CloudinaryController', function ($container) {
+    return new App\Controllers\CloudinaryController(
+        $container->get('App\Services\TafseerCloudinaryService'),
+        $container->get('App\Services\CloudinaryService')
     );
 });
 
@@ -69,8 +130,19 @@ if (!empty($basePath)) {
 // Add error middleware
 $app->addErrorMiddleware(true, true, true);
 
+// Add CORS middleware (must be added before routing middleware)
+$app->add($container->get('App\Middleware\CorsMiddleware'));
+
 // Add routing middleware
 $app->addRoutingMiddleware();
+
+// Add body parsing middleware
+$app->addBodyParsingMiddleware();
+
+// Global OPTIONS handler for CORS preflight
+$app->options('/{routes:.+}', function (Request $request, Response $response) {
+    return $response;
+});
 
 // Define routes
 $app->get('/', function (Request $request, Response $response) {
@@ -101,7 +173,11 @@ $app->get('/', function (Request $request, Response $response) {
             'GET /resources/recitations/{recitation_id}/pages/{page_number}' => 'Get ayah recitations for page',
             'GET /resources/recitations/{recitation_id}/rub-el-hizb/{rub_el_hizb_number}' => 'Get ayah recitations for rub el hizb',
             'GET /resources/recitations/{recitation_id}/hizb/{hizb_number}' => 'Get ayah recitations for hizb',
-            'GET /resources/ayah-recitation/{recitation_id}/{ayah_key}' => 'Get ayah recitation'
+            'GET /resources/ayah-recitation/{recitation_id}/{ayah_key}' => 'Get ayah recitation',
+            'POST /auth/register' => 'Register new user',
+            'POST /auth/login' => 'Login and get JWT token',
+            'GET /auth/test-protected' => 'Test JWT protection',
+            'GET /auth/test-admin' => 'Test Admin role protection'
         ]
     ]));
     return $response->withHeader('Content-Type', 'application/json');
@@ -145,5 +221,10 @@ $app->get('/health', function (Request $request, Response $response) use ($appCo
 (require __DIR__ . '/../src/routes/reciter.php')($app);
 (require __DIR__ . '/../src/routes/recitation.php')($app);
 (require __DIR__ . '/../src/routes/audio.php')($app);
+(require __DIR__ . '/../src/routes/auth.php')($app);
+(require __DIR__ . '/../src/routes/mufasser.php')($app);
+(require __DIR__ . '/../src/routes/tafseer.php')($app);
+(require __DIR__ . '/../src/routes/audio_tafseer.php')($app);
+(require __DIR__ . '/../src/routes/cloudinary.php')($app);
 
 $app->run();
