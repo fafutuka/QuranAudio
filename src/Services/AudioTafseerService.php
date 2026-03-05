@@ -14,13 +14,18 @@ class AudioTafseerService {
     public function getAudioTafseerById(int $id, bool $includeSegments = false): ?AudioTafseer {
         try {
             $query = "
-                SELECT at.*, t.mufasser_name, t.year 
+                SELECT at.*, 
+                       t.mufasser_id, t.year, t.language, t.translated_name, t.description,
+                       m.name as mufasser_name, 
+                       m.arabic_name as mufasser_arabic_name,
+                       m.biography as mufasser_biography,
+                       m.birth_year as mufasser_birth_year,
+                       m.death_year as mufasser_death_year,
+                       m.avatar_url as mufasser_avatar_url,
+                       m.background_url as mufasser_background_url
                 FROM audio_tafseers at 
-                JOIN (
-                    SELECT t.*, m.name as mufasser_name 
-                    FROM tafseers t 
-                    JOIN mufassers m ON t.mufasser_id = m.id
-                ) t ON at.tafseer_id = t.id 
+                JOIN tafseers t ON at.tafseer_id = t.id 
+                JOIN mufassers m ON t.mufasser_id = m.id
                 WHERE at.id = ?
             ";
             
@@ -61,13 +66,18 @@ class AudioTafseerService {
             }
 
             $query = "
-                SELECT at.*, t.mufasser_name, t.year 
+                SELECT at.*, 
+                       t.mufasser_id, t.year, t.language, t.translated_name, t.description,
+                       m.name as mufasser_name, 
+                       m.arabic_name as mufasser_arabic_name,
+                       m.biography as mufasser_biography,
+                       m.birth_year as mufasser_birth_year,
+                       m.death_year as mufasser_death_year,
+                       m.avatar_url as mufasser_avatar_url,
+                       m.background_url as mufasser_background_url
                 FROM audio_tafseers at 
-                JOIN (
-                    SELECT t.*, m.name as mufasser_name 
-                    FROM tafseers t 
-                    JOIN mufassers m ON t.mufasser_id = m.id
-                ) t ON at.tafseer_id = t.id 
+                JOIN tafseers t ON at.tafseer_id = t.id 
+                JOIN mufassers m ON t.mufasser_id = m.id
                 $whereClause
                 ORDER BY at.verse_range_from 
                 LIMIT ? OFFSET ?
@@ -129,13 +139,18 @@ class AudioTafseerService {
             }
 
             $query = "
-                SELECT at.*, t.mufasser_name, t.year 
+                SELECT at.*, 
+                       t.mufasser_id, t.year, t.language, t.translated_name, t.description,
+                       m.name as mufasser_name, 
+                       m.arabic_name as mufasser_arabic_name,
+                       m.biography as mufasser_biography,
+                       m.birth_year as mufasser_birth_year,
+                       m.death_year as mufasser_death_year,
+                       m.avatar_url as mufasser_avatar_url,
+                       m.background_url as mufasser_background_url
                 FROM audio_tafseers at 
-                JOIN (
-                    SELECT t.*, m.name as mufasser_name 
-                    FROM tafseers t 
-                    JOIN mufassers m ON t.mufasser_id = m.id
-                ) t ON at.tafseer_id = t.id 
+                JOIN tafseers t ON at.tafseer_id = t.id 
+                JOIN mufassers m ON t.mufasser_id = m.id
                 $whereClause
                 ORDER BY at.tafseer_id, 
                          CAST(SUBSTRING_INDEX(at.verse_range_from, ':', 1) AS UNSIGNED),
@@ -203,7 +218,13 @@ class AudioTafseerService {
             }
 
             $id = $this->db->create('audio_tafseers', $data);
-            return $this->getAudioTafseerById($id);
+            $audioTafseer = $this->getAudioTafseerById($id);
+            
+            if ($audioTafseer) {
+                return ['audio_tafseer' => $audioTafseer];
+            } else {
+                return ['error' => 'Failed to retrieve created audio tafseer'];
+            }
         } catch (\Exception $e) {
             return ['error' => 'Failed to create audio tafseer'];
         }

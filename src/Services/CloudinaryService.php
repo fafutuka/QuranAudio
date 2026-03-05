@@ -26,7 +26,17 @@ class CloudinaryService {
     public function __construct() {
         $this->config = require __DIR__ . '/../config/cloudinary.php';
         
-        // Initialize Cloudinary
+        // Initialize Cloudinary Configuration (for newer SDK versions)
+        \Cloudinary\Configuration\Configuration::instance([
+            'cloud' => [
+                'cloud_name' => $this->config['cloud_name'],
+                'api_key' => $this->config['api_key'],
+                'api_secret' => $this->config['api_secret'],
+                'secure' => $this->config['secure']
+            ]
+        ]);
+        
+        // Initialize Cloudinary instance
         $this->cloudinary = new Cloudinary([
             'cloud' => [
                 'cloud_name' => $this->config['cloud_name'],
@@ -61,18 +71,21 @@ class CloudinaryService {
             // Upload to Cloudinary
             $result = $this->uploadApi->upload($filePath, $uploadOptions);
             
+            // Convert ApiResponse to array
+            $resultArray = $result->getArrayCopy();
+            
             return [
                 'success' => true,
-                'public_id' => $result['public_id'],
-                'secure_url' => $result['secure_url'],
-                'url' => $result['url'],
-                'duration' => $result['duration'] ?? null,
-                'bytes' => $result['bytes'],
-                'format' => $result['format'],
-                'resource_type' => $result['resource_type'],
-                'created_at' => $result['created_at'],
-                'folder' => $result['folder'] ?? null,
-                'metadata' => $this->extractMetadata($result)
+                'public_id' => $resultArray['public_id'],
+                'secure_url' => $resultArray['secure_url'],
+                'url' => $resultArray['url'],
+                'duration' => $resultArray['duration'] ?? null,
+                'bytes' => $resultArray['bytes'],
+                'format' => $resultArray['format'],
+                'resource_type' => $resultArray['resource_type'],
+                'created_at' => $resultArray['created_at'],
+                'folder' => $resultArray['folder'] ?? null,
+                'metadata' => $this->extractMetadata($resultArray)
             ];
             
         } catch (Exception $e) {
@@ -152,9 +165,12 @@ class CloudinaryService {
                 'resource_type' => 'video'
             ]);
             
+            // Convert ApiResponse to array
+            $resultArray = $result->getArrayCopy();
+            
             return [
-                'success' => $result['result'] === 'ok',
-                'result' => $result['result']
+                'success' => $resultArray['result'] === 'ok',
+                'result' => $resultArray['result']
             ];
             
         } catch (Exception $e) {
@@ -177,16 +193,19 @@ class CloudinaryService {
                 'resource_type' => 'video'
             ]);
             
+            // Convert ApiResponse to array
+            $resultArray = $result->getArrayCopy();
+            
             return [
                 'success' => true,
-                'public_id' => $result['public_id'],
-                'format' => $result['format'],
-                'duration' => $result['duration'] ?? null,
-                'bytes' => $result['bytes'],
-                'url' => $result['secure_url'],
-                'created_at' => $result['created_at'],
-                'folder' => $result['folder'] ?? null,
-                'context' => $result['context'] ?? []
+                'public_id' => $resultArray['public_id'],
+                'format' => $resultArray['format'],
+                'duration' => $resultArray['duration'] ?? null,
+                'bytes' => $resultArray['bytes'],
+                'url' => $resultArray['secure_url'],
+                'created_at' => $resultArray['created_at'],
+                'folder' => $resultArray['folder'] ?? null,
+                'context' => $resultArray['context'] ?? []
             ];
             
         } catch (Exception $e) {
@@ -217,6 +236,9 @@ class CloudinaryService {
             
             $result = $this->adminApi->assets($options);
             
+            // Convert ApiResponse to array
+            $resultArray = $result->getArrayCopy();
+            
             return [
                 'success' => true,
                 'files' => array_map(function($asset) {
@@ -228,8 +250,8 @@ class CloudinaryService {
                         'url' => $asset['secure_url'],
                         'created_at' => $asset['created_at']
                     ];
-                }, $result['resources']),
-                'total_count' => $result['total_count'] ?? count($result['resources'])
+                }, $resultArray['resources']),
+                'total_count' => $resultArray['total_count'] ?? count($resultArray['resources'])
             ];
             
         } catch (Exception $e) {

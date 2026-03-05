@@ -86,7 +86,10 @@ $container->set('App\Services\AudioTafseerService', function ($container) {
 });
 
 $container->set('App\Controllers\MufasserController', function ($container) {
-    return new App\Controllers\MufasserController($container->get('App\Services\MufasserService'));
+    return new App\Controllers\MufasserController(
+        $container->get('App\Services\MufasserService'),
+        $container->get('App\Services\CloudinaryService')
+    );
 });
 
 $container->set('App\Controllers\TafseerController', function ($container) {

@@ -32,7 +32,8 @@ class AuthController
     public function login(Request $request, Response $response): Response
     {
         $data = $request->getParsedBody();
-        $email = $data['email'] ?? '';
+        // Accept both 'email' and 'username' fields for flexibility
+        $email = $data['email'] ?? $data['username'] ?? '';
         $password = $data['password'] ?? '';
 
         $result = $this->authService->login($email, $password);

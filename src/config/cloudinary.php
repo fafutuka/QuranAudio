@@ -7,10 +7,28 @@
  * For production, use environment variables.
  */
 
+// Load environment variables from .env file if it exists
+if (file_exists(__DIR__ . '/../../.env')) {
+    $lines = file(__DIR__ . '/../../.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        if (strpos(trim($line), '#') === 0) {
+            continue; // Skip comments
+        }
+        list($name, $value) = explode('=', $line, 2);
+        $name = trim($name);
+        $value = trim($value);
+        if (!array_key_exists($name, $_SERVER) && !array_key_exists($name, $_ENV)) {
+            putenv(sprintf('%s=%s', $name, $value));
+            $_ENV[$name] = $value;
+            $_SERVER[$name] = $value;
+        }
+    }
+}
+
 return [
-    'cloud_name' => getenv('CLOUDINARY_CLOUD_NAME') ?: 'QuranTafseer',
-    'api_key' => getenv('CLOUDINARY_API_KEY') ?: '325397735469775',
-    'api_secret' => getenv('CLOUDINARY_API_SECRET') ?: 'OfsS2T29M5ziu5HpOXctQ0FnuII',
+    'cloud_name' => getenv('CLOUDINARY_CLOUD_NAME') ?: 'your_cloud_name_here',
+    'api_key' => getenv('CLOUDINARY_API_KEY') ?: 'your_api_key_here',
+    'api_secret' => getenv('CLOUDINARY_API_SECRET') ?: 'your_api_secret_here',
     'secure' => true,
     
     // Audio upload settings

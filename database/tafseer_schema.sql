@@ -11,8 +11,15 @@ CREATE TABLE IF NOT EXISTS mufassers (
     biography TEXT,
     birth_year INT,
     death_year INT,
+    -- Image fields for Cloudinary integration
+    avatar_url VARCHAR(1000) NULL,
+    avatar_cloudinary_id VARCHAR(255) NULL,
+    background_url VARCHAR(1000) NULL,
+    background_cloudinary_id VARCHAR(255) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_avatar_cloudinary_id (avatar_cloudinary_id),
+    INDEX idx_background_cloudinary_id (background_cloudinary_id)
 );
 
 -- Tafseers table (equivalent to recitations)
