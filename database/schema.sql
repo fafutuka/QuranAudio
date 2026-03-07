@@ -173,7 +173,7 @@ CREATE TABLE IF NOT EXISTS tafseers (
 -- Audio Tafseers table (equivalent to audio_files but with verse ranges)
 CREATE TABLE IF NOT EXISTS audio_tafseers (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    tafseer_id INT NOT NULL,
+    mufasser_id INT NOT NULL,
     file_size BIGINT DEFAULT 0,
     format VARCHAR(10) DEFAULT 'mp3',
     audio_url VARCHAR(1000) NOT NULL,
@@ -186,9 +186,9 @@ CREATE TABLE IF NOT EXISTS audio_tafseers (
     audio_format VARCHAR(10) DEFAULT 'mp3',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (tafseer_id) REFERENCES tafseers(id) ON DELETE CASCADE,
+    FOREIGN KEY (mufasser_id) REFERENCES mufassers(id) ON DELETE CASCADE,
     INDEX idx_verse_range (verse_range_from, verse_range_to),
-    INDEX idx_tafseer_id (tafseer_id),
+    INDEX idx_mufasser_id (mufasser_id),
     INDEX idx_cloudinary_public_id (cloudinary_public_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -224,7 +224,7 @@ INSERT INTO tafseers (mufasser_id, year, language, translated_name, description)
 (5, 680, 'ar', '{"name": "Tanwir al-Miqbas", "language_name": "Arabic"}', 'Classical commentary attributed to Ibn Abbas');
 
 -- Sample audio tafseer entries
-INSERT INTO audio_tafseers (tafseer_id, audio_url, duration, verse_range_from, verse_range_to, file_size) VALUES
+INSERT INTO audio_tafseers (mufasser_id, audio_url, duration, verse_range_from, verse_range_to, file_size) VALUES
 (1, 'https://example.com/audio/ibn_kathir/001_001-007.mp3', 1200, '1:1', '1:7', 2400000),
 (1, 'https://example.com/audio/ibn_kathir/001_008-020.mp3', 1800, '1:8', '1:20', 3600000),
 (2, 'https://example.com/audio/al_tabari/001_001-007.mp3', 1500, '1:1', '1:7', 3000000),

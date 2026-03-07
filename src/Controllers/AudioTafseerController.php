@@ -33,12 +33,12 @@ class AudioTafseerController {
         $verseFrom = $args['verse_from'];
         $verseTo = $args['verse_to'] ?? $verseFrom;
         $queryParams = $request->getQueryParams();
-        $tafseerIds = isset($queryParams['tafseer_ids']) ? array_map('intval', explode(',', $queryParams['tafseer_ids'])) : [];
+        $mufasserIds = isset($queryParams['mufasser_ids']) ? array_map('intval', explode(',', $queryParams['mufasser_ids'])) : [];
         $segments = filter_var($queryParams['segments'] ?? false, FILTER_VALIDATE_BOOLEAN);
         $page = (int)($queryParams['page'] ?? 1);
         $perPage = (int)($queryParams['per_page'] ?? 10);
 
-        $result = $this->audioTafseerService->getAudioTafseerByVerseRange($verseFrom, $verseTo, $tafseerIds, $segments, $page, $perPage);
+        $result = $this->audioTafseerService->getAudioTafseerByVerseRange($verseFrom, $verseTo, $mufasserIds, $segments, $page, $perPage);
 
         if (isset($result['error'])) {
             $response->getBody()->write(json_encode(['error' => $result['error']]));
@@ -52,7 +52,7 @@ class AudioTafseerController {
     public function getAudioTafseerByChapter(Request $request, Response $response, array $args): Response {
         $chapterNumber = (int)$args['chapter_number'];
         $queryParams = $request->getQueryParams();
-        $tafseerIds = isset($queryParams['tafseer_ids']) ? array_map('intval', explode(',', $queryParams['tafseer_ids'])) : [];
+        $mufasserIds = isset($queryParams['mufasser_ids']) ? array_map('intval', explode(',', $queryParams['mufasser_ids'])) : [];
         $segments = filter_var($queryParams['segments'] ?? false, FILTER_VALIDATE_BOOLEAN);
         $page = (int)($queryParams['page'] ?? 1);
         $perPage = (int)($queryParams['per_page'] ?? 10);
@@ -63,7 +63,7 @@ class AudioTafseerController {
             return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
         }
 
-        $result = $this->audioTafseerService->getAudioTafseerByChapter($chapterNumber, $tafseerIds, $segments, $page, $perPage);
+        $result = $this->audioTafseerService->getAudioTafseerByChapter($chapterNumber, $mufasserIds, $segments, $page, $perPage);
 
         if (isset($result['error'])) {
             $response->getBody()->write(json_encode(['error' => $result['error']]));
@@ -79,7 +79,7 @@ class AudioTafseerController {
         $data = json_decode($request->getBody()->getContents(), true);
 
         // Validate required fields
-        $requiredFields = ['tafseer_id', 'audio_url', 'verse_range_from', 'verse_range_to'];
+        $requiredFields = ['mufasser_id', 'audio_url', 'verse_range_from', 'verse_range_to'];
         foreach ($requiredFields as $field) {
             if (!isset($data[$field]) || empty($data[$field])) {
                 $response->getBody()->write(json_encode(['error' => "Missing required field: $field"]));

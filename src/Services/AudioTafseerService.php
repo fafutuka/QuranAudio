@@ -15,7 +15,6 @@ class AudioTafseerService {
         try {
             $query = "
                 SELECT at.*, 
-                       t.mufasser_id, t.year, t.language, t.translated_name, t.description,
                        m.name as mufasser_name, 
                        m.arabic_name as mufasser_arabic_name,
                        m.biography as mufasser_biography,
@@ -24,8 +23,7 @@ class AudioTafseerService {
                        m.avatar_url as mufasser_avatar_url,
                        m.background_url as mufasser_background_url
                 FROM audio_tafseers at 
-                JOIN tafseers t ON at.tafseer_id = t.id 
-                JOIN mufassers m ON t.mufasser_id = m.id
+                JOIN mufassers m ON at.mufasser_id = m.id
                 WHERE at.id = ?
             ";
             
@@ -43,11 +41,12 @@ class AudioTafseerService {
 
             return $audioTafseer;
         } catch (\Exception $e) {
+            error_log("AudioTafseerService::getAudioTafseerById Error: " . $e->getMessage());
             return null;
         }
     }
 
-    public function getAudioTafseerByVerseRange(string $verseFrom, string $verseTo, array $tafseerIds = [], bool $includeSegments = false, int $page = 1, int $perPage = 10): array {
+    public function getAudioTafseerByVerseRange(string $verseFrom, string $verseTo, array $mufasserIds = [], bool $includeSegments = false, int $page = 1, int $perPage = 10): array {
         try {
             $offset = ($page - 1) * $perPage;
             
@@ -59,15 +58,14 @@ class AudioTafseerService {
             
             $params = [$verseFrom, $verseFrom, $verseTo, $verseTo, $verseFrom, $verseTo];
             
-            if (!empty($tafseerIds)) {
-                $placeholders = str_repeat('?,', count($tafseerIds) - 1) . '?';
-                $whereClause .= " AND at.tafseer_id IN ($placeholders)";
-                $params = array_merge($params, $tafseerIds);
+            if (!empty($mufasserIds)) {
+                $placeholders = str_repeat('?,', count($mufasserIds) - 1) . '?';
+                $whereClause .= " AND at.mufasser_id IN ($placeholders)";
+                $params = array_merge($params, $mufasserIds);
             }
 
             $query = "
                 SELECT at.*, 
-                       t.mufasser_id, t.year, t.language, t.translated_name, t.description,
                        m.name as mufasser_name, 
                        m.arabic_name as mufasser_arabic_name,
                        m.biography as mufasser_biography,
@@ -76,8 +74,7 @@ class AudioTafseerService {
                        m.avatar_url as mufasser_avatar_url,
                        m.background_url as mufasser_background_url
                 FROM audio_tafseers at 
-                JOIN tafseers t ON at.tafseer_id = t.id 
-                JOIN mufassers m ON t.mufasser_id = m.id
+                JOIN mufassers m ON at.mufasser_id = m.id
                 $whereClause
                 ORDER BY at.verse_range_from 
                 LIMIT ? OFFSET ?
@@ -116,11 +113,12 @@ class AudioTafseerService {
                 ]
             ];
         } catch (\Exception $e) {
-            return ['error' => 'Failed to fetch audio tafseer by verse range'];
+            error_log("AudioTafseerService::getAudioTafseerByVerseRange Error: " . $e->getMessage());
+            return ['error' => 'Failed to fetch audio tafseer by verse range: ' . $e->getMessage()];
         }
     }
 
-    public function getAudioTafseerByChapter(int $chapterNumber, array $tafseerIds = [], bool $includeSegments = false, int $page = 1, int $perPage = 10): array {
+    public function getAudioTafseerByChapter(int $chapterNumber, array $mufasserIds = [], bool $includeSegments = false, int $page = 1, int $perPage = 10): array {
         try {
             $offset = ($page - 1) * $perPage;
             
@@ -132,15 +130,14 @@ class AudioTafseerService {
             
             $params = [$chapterNumber, $chapterNumber];
             
-            if (!empty($tafseerIds)) {
-                $placeholders = str_repeat('?,', count($tafseerIds) - 1) . '?';
-                $whereClause .= " AND at.tafseer_id IN ($placeholders)";
-                $params = array_merge($params, $tafseerIds);
+            if (!empty($mufasserIds)) {
+                $placeholders = str_repeat('?,', count($mufasserIds) - 1) . '?';
+                $whereClause .= " AND at.mufasser_id IN ($placeholders)";
+                $params = array_merge($params, $mufasserIds);
             }
 
             $query = "
                 SELECT at.*, 
-                       t.mufasser_id, t.year, t.language, t.translated_name, t.description,
                        m.name as mufasser_name, 
                        m.arabic_name as mufasser_arabic_name,
                        m.biography as mufasser_biography,
@@ -149,10 +146,9 @@ class AudioTafseerService {
                        m.avatar_url as mufasser_avatar_url,
                        m.background_url as mufasser_background_url
                 FROM audio_tafseers at 
-                JOIN tafseers t ON at.tafseer_id = t.id 
-                JOIN mufassers m ON t.mufasser_id = m.id
+                JOIN mufassers m ON at.mufasser_id = m.id
                 $whereClause
-                ORDER BY at.tafseer_id, 
+                ORDER BY at.mufasser_id, 
                          CAST(SUBSTRING_INDEX(at.verse_range_from, ':', 1) AS UNSIGNED),
                          CAST(SUBSTRING_INDEX(at.verse_range_from, ':', -1) AS UNSIGNED)
                 LIMIT ? OFFSET ?
@@ -194,13 +190,14 @@ class AudioTafseerService {
                 ]
             ];
         } catch (\Exception $e) {
-            return ['error' => 'Failed to fetch audio tafseer by chapter'];
+            error_log("AudioTafseerService::getAudioTafseerByChapter Error: " . $e->getMessage());
+            return ['error' => 'Failed to fetch audio tafseer by chapter: ' . $e->getMessage()];
         }
     }
 
     public function createAudioTafseer(array $data): array {
         try {
-            $requiredFields = ['tafseer_id', 'audio_url', 'verse_range_from', 'verse_range_to'];
+            $requiredFields = ['mufasser_id', 'audio_url', 'verse_range_from', 'verse_range_to'];
             foreach ($requiredFields as $field) {
                 if (!isset($data[$field]) || empty($data[$field])) {
                     return ['error' => "Missing required field: $field"];

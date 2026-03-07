@@ -48,7 +48,7 @@ class CloudinaryController {
             }
 
             // Validate required tafseer data
-            $requiredFields = ['tafseer_id', 'verse_range_from', 'verse_range_to'];
+            $requiredFields = ['mufasser_id', 'verse_range_from', 'verse_range_to'];
             foreach ($requiredFields as $field) {
                 if (!isset($parsedBody[$field]) || empty($parsedBody[$field])) {
                     $response->getBody()->write(json_encode(['error' => "Missing required field: $field"]));
@@ -58,7 +58,7 @@ class CloudinaryController {
 
             // Prepare tafseer data
             $tafseerData = [
-                'tafseer_id' => (int)$parsedBody['tafseer_id'],
+                'mufasser_id' => (int)$parsedBody['mufasser_id'],
                 'verse_range_from' => $parsedBody['verse_range_from'],
                 'verse_range_to' => $parsedBody['verse_range_to']
             ];

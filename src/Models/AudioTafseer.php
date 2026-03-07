@@ -4,7 +4,7 @@ namespace App\Models;
 
 class AudioTafseer {
     public $id;
-    public $tafseer_id;
+    public $mufasser_id;
     public $file_size;
     public $format;
     public $audio_url;
@@ -29,7 +29,7 @@ class AudioTafseer {
 
     public function __construct($data) {
         $this->id = isset($data['id']) ? $data['id'] : null;
-        $this->tafseer_id = isset($data['tafseer_id']) ? $data['tafseer_id'] : null;
+        $this->mufasser_id = isset($data['mufasser_id']) ? $data['mufasser_id'] : null;
         $this->file_size = isset($data['file_size']) ? $data['file_size'] : 0;
         $this->format = isset($data['format']) ? $data['format'] : 'mp3';
         $this->audio_url = isset($data['audio_url']) ? $data['audio_url'] : '';
@@ -67,11 +67,11 @@ class AudioTafseer {
         $this->audio_format = isset($data['audio_format']) ? $data['audio_format'] : $this->format;
         $this->quality_urls = isset($data['quality_urls']) ? $data['quality_urls'] : [];
         
-        // Mufasser relationship
+        // Mufasser relationship - now directly available since we join with mufassers table
         $this->mufasser = null;
-        if (isset($data['mufasser_id'])) {
+        if (isset($data['mufasser_name'])) {
             $this->mufasser = [
-                'id' => (int)$data['mufasser_id'],
+                'id' => (int)$this->mufasser_id,
                 'name' => $data['mufasser_name'] ?? null,
                 'arabic_name' => $data['mufasser_arabic_name'] ?? null,
                 'biography' => $data['mufasser_biography'] ?? null,

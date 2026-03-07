@@ -95,6 +95,80 @@ class CloudinaryService {
             ];
         }
     }
+    /**
+     * Upload image to Cloudinary
+     *
+     * @param string $imageData Image file content or file path
+     * @param string $publicId Public ID for the image
+     * @param string $folder Folder to store the image
+     * @param array $options Upload options (transformations, etc.)
+     * @return array Upload result
+     */
+    /**
+     * Upload image to Cloudinary
+     * 
+     * @param string $imageData Image file content or file path
+     * @param string $publicId Public ID for the image
+     * @param string $folder Folder to store the image
+     * @param array $options Upload options (transformations, etc.)
+     * @return array Upload result
+     */
+    public function uploadImage(string $imageData, string $publicId, string $folder, array $options = []): array {
+        try {
+            // Validate Cloudinary configuration
+            if (!$this->cloudinary) {
+                return ['error' => 'Cloudinary not configured'];
+            }
+
+            // Prepare upload options
+            $uploadOptions = [
+                'public_id' => $publicId,
+                'folder' => $folder,
+                'resource_type' => 'image',
+                'overwrite' => true,
+                'invalidate' => true,
+            ];
+
+            // Add transformation options if provided
+            if (!empty($options)) {
+                if (isset($options['width'])) $uploadOptions['width'] = $options['width'];
+                if (isset($options['height'])) $uploadOptions['height'] = $options['height'];
+                if (isset($options['crop'])) $uploadOptions['crop'] = $options['crop'];
+                if (isset($options['gravity'])) $uploadOptions['gravity'] = $options['gravity'];
+                if (isset($options['quality'])) $uploadOptions['quality'] = $options['quality'];
+                if (isset($options['format'])) $uploadOptions['format'] = $options['format'];
+            }
+
+            // Check if imageData is a file path or binary data
+            $uploadData = $imageData;
+            if (!file_exists($imageData)) {
+                // It's binary data, convert to data URI
+                $base64Data = base64_encode($imageData);
+                $uploadData = 'data:image/png;base64,' . $base64Data;
+            }
+
+            // Upload the image
+            $result = $this->cloudinary->uploadApi()->upload($uploadData, $uploadOptions);
+
+            return [
+                'success' => true,
+                'public_id' => $result['public_id'],
+                'secure_url' => $result['secure_url'],
+                'url' => $result['url'],
+                'width' => $result['width'] ?? null,
+                'height' => $result['height'] ?? null,
+                'format' => $result['format'] ?? null,
+                'bytes' => $result['bytes'] ?? null,
+                'created_at' => $result['created_at'] ?? null
+            ];
+
+        } catch (Exception $e) {
+            error_log("Cloudinary image upload error: " . $e->getMessage());
+            return ['error' => 'Image upload failed: ' . $e->getMessage()];
+        }
+    }
+
+
 
     /**
      * Upload audio for specific tafseer with organized naming
@@ -106,15 +180,15 @@ class CloudinaryService {
      * @param array $options Additional options
      * @return array Upload result
      */
-    public function uploadTafseerAudio(string $filePath, int $tafseerId, string $verseFrom, string $verseTo, array $options = []): array {
+    public function uploadTafseerAudio(string $filePath, int $mufasserId, string $verseFrom, string $verseTo, array $options = []): array {
         // Generate organized public_id
-        $publicId = $this->generateTafseerPublicId($tafseerId, $verseFrom, $verseTo, $options);
+        $publicId = $this->generateTafseerPublicId($mufasserId, $verseFrom, $verseTo, $options);
         
         $uploadOptions = array_merge($options, [
             'public_id' => $publicId,
-            'folder' => $this->config['audio']['folder'] . "/tafseer_{$tafseerId}",
+            'folder' => $this->config['audio']['folder'] . "/mufasser_{$mufasserId}",
             'context' => [
-                'tafseer_id' => $tafseerId,
+                'mufasser_id' => $mufasserId,
                 'verse_from' => $verseFrom,
                 'verse_to' => $verseTo,
                 'upload_date' => date('Y-m-d H:i:s')
@@ -329,11 +403,11 @@ class CloudinaryService {
      * @param array $options Additional options
      * @return string Generated public ID
      */
-    private function generateTafseerPublicId(int $tafseerId, string $verseFrom, string $verseTo, array $options): string {
+    private function generateTafseerPublicId(int $mufasserId, string $verseFrom, string $verseTo, array $options): string {
         $verseFromClean = str_replace(':', '_', $verseFrom);
         $verseToClean = str_replace(':', '_', $verseTo);
         
-        $publicId = "tafseer_{$tafseerId}_verses_{$verseFromClean}_to_{$verseToClean}";
+        $publicId = "mufasser_{$mufasserId}_verses_{$verseFromClean}_to_{$verseToClean}";
         
         // Add timestamp if unique filename is needed
         if (!isset($options['overwrite']) || !$options['overwrite']) {

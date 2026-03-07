@@ -95,7 +95,7 @@ class MufasserService {
 
     public function updateMufasser(int $id, array $data): ?Mufasser {
         try {
-            $updated = $this->db->update('mufassers', $id, $data);
+            $updated = $this->db->update('mufassers', $data, ['id' => $id]);
             if (!$updated) {
                 return null;
             }

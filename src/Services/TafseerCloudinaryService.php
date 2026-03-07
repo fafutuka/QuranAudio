@@ -32,7 +32,7 @@ class TafseerCloudinaryService {
     public function uploadAndCreateTafseerAudio(string $filePath, array $tafseerData, array $uploadOptions = []): array {
         try {
             // Validate required tafseer data
-            $requiredFields = ['tafseer_id', 'verse_range_from', 'verse_range_to'];
+            $requiredFields = ['mufasser_id', 'verse_range_from', 'verse_range_to'];
             foreach ($requiredFields as $field) {
                 if (!isset($tafseerData[$field]) || empty($tafseerData[$field])) {
                     return ['error' => "Missing required field: $field"];
@@ -42,7 +42,7 @@ class TafseerCloudinaryService {
             // Upload to Cloudinary
             $uploadResult = $this->cloudinaryService->uploadTafseerAudio(
                 $filePath,
-                $tafseerData['tafseer_id'],
+                $tafseerData['mufasser_id'],
                 $tafseerData['verse_range_from'],
                 $tafseerData['verse_range_to'],
                 $uploadOptions
