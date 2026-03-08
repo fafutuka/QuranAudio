@@ -42,5 +42,32 @@ return function (App $app) {
         // Get audio file information from Cloudinary
         $group->get('/audio-info/{public_id:.+}', [CloudinaryController::class, 'getAudioInfo'])
             ->add($container->get('App\Middleware\JwtMiddleware'));
+        
+        // ===== MAULUD CLOUDINARY ROUTES =====
+        
+        // Upload Maulud audio to Cloudinary
+        $group->post('/maulud-audio', [CloudinaryController::class, 'uploadMauludAudio'])
+            ->add($container->get('App\Middleware\JwtMiddleware'));
+        
+        // Update Maulud audio file
+        $group->put('/maulud-audio/{id:[0-9]+}', [CloudinaryController::class, 'updateMauludAudio'])
+            ->add($container->get('App\Middleware\JwtMiddleware'));
+        
+        // Delete Maulud audio (both database and Cloudinary)
+        $group->delete('/maulud-audio/{id:[0-9]+}', [CloudinaryController::class, 'deleteMauludAudio'])
+            ->add($container->get('App\Middleware\JwtMiddleware'));
+        
+        // Get Maulud audio metadata from Cloudinary
+        $group->get('/maulud-audio/{public_id:.+}/metadata', [CloudinaryController::class, 'getMauludAudioMetadata']);
+        
+        // Generate waveform for Maulud audio
+        $group->get('/maulud-audio/{public_id:.+}/waveform', [CloudinaryController::class, 'generateMauludWaveform']);
+        
+        // Get streaming URL for Maulud audio
+        $group->get('/maulud-audio/{public_id:.+}/stream', [CloudinaryController::class, 'getMauludStreamingUrl']);
+        
+        // List all Maulud audio files in Cloudinary
+        $group->get('/maulud-audio/list', [CloudinaryController::class, 'listMauludAudioFiles'])
+            ->add($container->get('App\Middleware\JwtMiddleware'));
     });
 };

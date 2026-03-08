@@ -112,11 +112,28 @@ $container->set('App\Services\TafseerCloudinaryService', function ($container) {
     );
 });
 
+$container->set('App\Services\MauludCloudinaryService', function ($container) {
+    return new App\Services\MauludCloudinaryService(
+        $container->get('App\Services\CloudinaryService'),
+        $container->get('App\Services\MauludService')
+    );
+});
+
 $container->set('App\Controllers\CloudinaryController', function ($container) {
     return new App\Controllers\CloudinaryController(
         $container->get('App\Services\TafseerCloudinaryService'),
-        $container->get('App\Services\CloudinaryService')
+        $container->get('App\Services\CloudinaryService'),
+        $container->get('App\Services\MauludCloudinaryService')
     );
+});
+
+// Maulud dependencies
+$container->set('App\Services\MauludService', function ($container) {
+    return new App\Services\MauludService($container->get('DatabaseService'));
+});
+
+$container->set('App\Controllers\MauludController', function ($container) {
+    return new App\Controllers\MauludController($container->get('App\Services\MauludService'));
 });
 
 // Create App
@@ -229,5 +246,6 @@ $app->get('/health', function (Request $request, Response $response) use ($appCo
 (require __DIR__ . '/../src/routes/tafseer.php')($app);
 (require __DIR__ . '/../src/routes/audio_tafseer.php')($app);
 (require __DIR__ . '/../src/routes/cloudinary.php')($app);
+(require __DIR__ . '/../src/routes/maulud.php')($app);
 
 $app->run();
