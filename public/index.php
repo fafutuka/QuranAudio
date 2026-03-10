@@ -143,15 +143,14 @@ $app = AppFactory::create();
 $apiHost = $appConfig['api_host'];
 $parsedUrl = parse_url($apiHost);
 $basePath = $parsedUrl['path'] ?? '';
-if (!empty($basePath)) {
+
+// Only set base path if it's not root and not empty
+if (!empty($basePath) && $basePath !== '/') {
     $app->setBasePath($basePath);
 }
 
 // Add error middleware
 $app->addErrorMiddleware(true, true, true);
-
-// Add CORS middleware (must be added before routing middleware)
-$app->add($container->get('App\Middleware\CorsMiddleware'));
 
 // Add routing middleware
 $app->addRoutingMiddleware();
@@ -159,9 +158,14 @@ $app->addRoutingMiddleware();
 // Add body parsing middleware
 $app->addBodyParsingMiddleware();
 
-// Global OPTIONS handler for CORS preflight
-$app->options('/{routes:.+}', function (Request $request, Response $response) {
-    return $response;
+// Add CORS middleware (must be added last so it executes first)
+$app->add($container->get('App\Middleware\CorsMiddleware'));
+
+// Global OPTIONS handler for CORS preflight - catch all OPTIONS requests
+$app->options('/{routes:.*}', function (Request $request, Response $response) {
+    // This should not be reached if CORS middleware is working properly
+    // But serves as a fallback
+    return $response->withStatus(204);
 });
 
 // Define routes
@@ -233,6 +237,21 @@ $app->get('/health', function (Request $request, Response $response) use ($appCo
         'database' => $dbStatus,
         'version' => '1.0',
         'php_version' => phpversion()
+    ]));
+    return $response->withHeader('Content-Type', 'application/json');
+});
+
+// CORS test endpoint
+$app->get('/cors-test', function (Request $request, Response $response) {
+    $origin = $request->getHeaderLine('Origin');
+    $userAgent = $request->getHeaderLine('User-Agent');
+
+    $response->getBody()->write(json_encode([
+        'message' => 'CORS test successful',
+        'origin' => $origin,
+        'user_agent' => $userAgent,
+        'timestamp' => date('Y-m-d H:i:s'),
+        'headers_received' => $request->getHeaders()
     ]));
     return $response->withHeader('Content-Type', 'application/json');
 });

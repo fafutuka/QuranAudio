@@ -36,15 +36,19 @@ class MauludCloudinaryService
         }
 
         // Validate audio file
-        if (!isset($audioFile['tmp_name']) || !is_uploaded_file($audioFile['tmp_name'])) {
+        if (!isset($audioFile['tmp_name']) || !file_exists($audioFile['tmp_name'])) {
             return ['error' => 'Valid audio file is required'];
         }
 
         // Validate file type
-        $allowedTypes = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/m4a'];
+        $allowedTypes = [
+            'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/wave', 'audio/x-wav',
+            'audio/ogg', 'audio/m4a', 'audio/mp4', 'audio/aac', 'audio/x-aac',
+            'audio/flac', 'audio/x-flac'
+        ];
         $fileType = $audioFile['type'] ?? '';
         if (!in_array($fileType, $allowedTypes)) {
-            return ['error' => 'Invalid audio file type. Allowed types: MP3, WAV, OGG, M4A'];
+            return ['error' => 'Invalid audio file type. Allowed types: MP3, WAV, OGG, M4A, AAC, FLAC'];
         }
 
         // Validate file size (max 50MB)
@@ -133,7 +137,7 @@ class MauludCloudinaryService
         }
 
         // Validate audio file
-        if (!isset($audioFile['tmp_name']) || !is_uploaded_file($audioFile['tmp_name'])) {
+        if (!isset($audioFile['tmp_name']) || !file_exists($audioFile['tmp_name'])) {
             return ['error' => 'Valid audio file is required'];
         }
 

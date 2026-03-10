@@ -339,9 +339,20 @@ class CloudinaryController {
                 'location' => $parsedBody['location'] ?? null
             ];
 
-            // Prepare audio file data
+            // Prepare audio file data - save uploaded file to temp location with proper extension
+            $originalFilename = $uploadedFile->getClientFilename();
+            $extension = pathinfo($originalFilename, PATHINFO_EXTENSION);
+            
+            // Default to mp3 if no extension is found
+            if (empty($extension)) {
+                $extension = 'mp3';
+            }
+            
+            $tempFile = tempnam(sys_get_temp_dir(), 'maulud_upload_') . '.' . $extension;
+            $uploadedFile->moveTo($tempFile);
+            
             $audioFileData = [
-                'tmp_name' => $uploadedFile->getStream()->getMetadata('uri'),
+                'tmp_name' => $tempFile,
                 'size' => $uploadedFile->getSize(),
                 'type' => $uploadedFile->getClientMediaType(),
                 'name' => $uploadedFile->getClientFilename()
@@ -349,6 +360,11 @@ class CloudinaryController {
 
             // Upload and create maulud
             $result = $this->mauludCloudinaryService->uploadMauludAudio($mauludData, $audioFileData);
+
+            // Clean up temporary file
+            if (file_exists($tempFile)) {
+                unlink($tempFile);
+            }
 
             if (isset($result['error'])) {
                 $response->getBody()->write(json_encode(['error' => $result['error']]));
@@ -359,6 +375,10 @@ class CloudinaryController {
             return $response->withStatus(201)->withHeader('Content-Type', 'application/json');
 
         } catch (\Exception $e) {
+            // Clean up temporary file in case of exception
+            if (isset($tempFile) && file_exists($tempFile)) {
+                unlink($tempFile);
+            }
             error_log("Error uploading maulud audio: " . $e->getMessage());
             $response->getBody()->write(json_encode(['error' => 'Upload failed: ' . $e->getMessage()]));
             return $response->withStatus(500)->withHeader('Content-Type', 'application/json');
@@ -387,9 +407,20 @@ class CloudinaryController {
                 return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
             }
 
-            // Prepare audio file data
+            // Prepare audio file data - save uploaded file to temp location with proper extension
+            $originalFilename = $uploadedFile->getClientFilename();
+            $extension = pathinfo($originalFilename, PATHINFO_EXTENSION);
+            
+            // Default to mp3 if no extension is found
+            if (empty($extension)) {
+                $extension = 'mp3';
+            }
+            
+            $tempFile = tempnam(sys_get_temp_dir(), 'maulud_update_') . '.' . $extension;
+            $uploadedFile->moveTo($tempFile);
+            
             $audioFileData = [
-                'tmp_name' => $uploadedFile->getStream()->getMetadata('uri'),
+                'tmp_name' => $tempFile,
                 'size' => $uploadedFile->getSize(),
                 'type' => $uploadedFile->getClientMediaType(),
                 'name' => $uploadedFile->getClientFilename()
@@ -406,6 +437,11 @@ class CloudinaryController {
 
             $result = $this->mauludCloudinaryService->updateMauludAudio($mauludId, $audioFileData, $metadata);
 
+            // Clean up temporary file
+            if (file_exists($tempFile)) {
+                unlink($tempFile);
+            }
+
             if (isset($result['error'])) {
                 $status = $result['error'] === 'Maulud not found' ? 404 : 400;
                 $response->getBody()->write(json_encode(['error' => $result['error']]));
@@ -416,6 +452,10 @@ class CloudinaryController {
             return $response->withHeader('Content-Type', 'application/json');
 
         } catch (\Exception $e) {
+            // Clean up temporary file in case of exception
+            if (isset($tempFile) && file_exists($tempFile)) {
+                unlink($tempFile);
+            }
             error_log("Error updating maulud audio: " . $e->getMessage());
             $response->getBody()->write(json_encode(['error' => 'Update failed: ' . $e->getMessage()]));
             return $response->withStatus(500)->withHeader('Content-Type', 'application/json');

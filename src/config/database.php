@@ -1,18 +1,18 @@
 <?php
 
 // Detect environment based on hostname
-$isProduction = isset($_SERVER['HTTP_HOST']) && 
-                (strpos($_SERVER['HTTP_HOST'], 'quranaudio.fafutuka.com') !== false ||
-                 strpos($_SERVER['HTTP_HOST'], 'fafutuka.com') !== false);
+$isProduction = isset($_SERVER['HTTP_HOST']) &&
+    (strpos($_SERVER['HTTP_HOST'], 'api.sheiknasidi.com.ng') !== false ||
+        strpos($_SERVER['HTTP_HOST'], 'api.sheiknasidi.com.ng') !== false);
 
 // Return appropriate database configuration based on environment
 if ($isProduction) {
     // Production environment (online)
     return [
         'host' => 'localhost',
-        'user' => 'fafutuka_taliya',
+        'user' => 'sheiknas_taliya',
         'password' => '@Katonmabudi1',
-        'database' => 'fafutuka_qurantafseer'
+        'database' => 'sheiknas_qurantafseer'
     ];
 } else {
     // Local development environment

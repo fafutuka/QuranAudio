@@ -5,17 +5,17 @@
 
 $env = getenv('APP_ENV') ?: 'production';
 $localBase = getenv('FRONTEND_BASE_URL_LOCAL') ?: 'http://localhost:9000/#/';
-$prodBase = getenv('FRONTEND_BASE_URL_PROD') ?: 'https://quran.fafutuka.com/#/';
+$prodBase = getenv('FRONTEND_BASE_URL_PROD') ?: 'https://sheiknasidi.com.ng/#/';
 $base = getenv('FRONTEND_BASE_URL') ?: ($env === 'local' ? $localBase : $prodBase);
 
 // API Host configuration for QuranAudio
 $localApiHost = getenv('API_HOST_LOCAL') ?: 'http://localhost/QuranAudio';
-$prodApiHost = getenv('API_HOST_PROD') ?: 'https://quranapi.fafutuka.com';
+$prodApiHost = getenv('API_HOST_PROD') ?: 'https://api.sheiknasidi.com.ng';
 $apiHost = getenv('API_HOST') ?: ($env === 'local' ? $localApiHost : $prodApiHost);
 
 /**
  * Get the frontend URL for redirects
- * 
+ *
  * @param int $eventId Event ID for the registration page (optional)
  * @return string Frontend URL
  */
@@ -44,7 +44,7 @@ if (!function_exists('getFrontendUrl')) {
             if (isset($appConfig['frontend_base_url']) && is_string($appConfig['frontend_base_url']) && $appConfig['frontend_base_url'] !== '') {
                 $base = $appConfig['frontend_base_url'];
             } else {
-                $base = $envBase ?: (getenv('FRONTEND_BASE_URL_PROD') ?: 'https://quran.fafutuka.com/#/');
+                $base = $envBase ?: (getenv('FRONTEND_BASE_URL_PROD') ?: 'https://api.sheiknasidi.com.ng/#/');
             }
         }
 
@@ -67,7 +67,7 @@ if (!function_exists('getFrontendUrl')) {
 /**
  * Get the API host URL based on environment detection
  * Uses same logic as getFrontendUrl for consistency
- * 
+ *
  * @return string API host URL (without trailing slash)
  */
 if (!function_exists('getApiHost')) {
@@ -78,7 +78,7 @@ if (!function_exists('getApiHost')) {
 
         // Environment configuration for QuranAudio
         $localApiHost = getenv('API_HOST_LOCAL') ?: 'http://localhost/QuranAudio';
-        $prodApiHost = getenv('API_HOST_PROD') ?: 'https://quranapi.fafutuka.com';
+        $prodApiHost = getenv('API_HOST_PROD') ?: 'https://api.sheiknasidi.com.ng';
 
         // Highest priority: explicit API_HOST env var
         $envApiHost = getenv('API_HOST') ?: '';

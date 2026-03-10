@@ -1,4 +1,6 @@
 RewriteEngine On
+
+# Let PHP handle all CORS requests including OPTIONS
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.php [QSA,L]
